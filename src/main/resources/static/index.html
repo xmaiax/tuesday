@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Darwin</title>
+    <link href='https://fonts.googleapis.com/css?family=Montserrat' rel='stylesheet'>
+    <link href="webjars/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <style type="text/css">
+      .application {
+        margin-top: 64px;
+      }
+    </style>
+  </head>
+
+  <body class="container">
+    <div ng-app="darwinApp" ng-controller="darwinController" class="application">
+      <h1>{{ xuruvis }}</h1>
+    </div>
+  </body>
+
+  <script src="webjars/jquery/jquery.min.js"></script>
+  <script src="webjars/bootstrap/js/bootstrap.min.js"></script>
+  <script src="webjars/sockjs-client/sockjs.min.js"></script>
+  <script src="webjars/stomp-websocket/stomp.min.js"></script>
+  <script src="webjars/angularjs/angular.min.js"></script>
+  <script src="js/websocket.js"></script>
+  <script type="text/javascript">
+
+    angular.module('darwinApp', []).controller('darwinController', ($scope) => {
+      $scope.xuruvis = 'XURUUUUUUUUUUVIS'
+    })
+
+  </script>
+
+</html>
