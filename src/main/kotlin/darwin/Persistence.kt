@@ -78,7 +78,7 @@ open class AssistantService(
   }
   catch(ex: EmptyResultDataAccessException) {
     LOGGER.info(NO_INSTANCE_FOUND_MESSAGE + instance)
-    throw AssistantException(NO_INSTANCE_FOUND_MESSAGE, HttpStatus.BAD_REQUEST)
+    throw AssistantException(NO_INSTANCE_FOUND_MESSAGE + instance, HttpStatus.BAD_REQUEST)
   }
 
   fun deleteByInstance(instance: String) =
