@@ -1,36 +1,36 @@
 package darwin
 
-import org.springframework.http.HttpStatus
-import org.springframework.data.mongodb.repository.MongoRepository
-import org.springframework.web.bind.annotation.PostMapping
+import com.fasterxml.jackson.annotation.JsonIgnore
+
+import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiOperation
 import io.swagger.annotations.ApiParam
-import org.springframework.web.bind.annotation.RequestParam
+
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.dao.DuplicateKeyException
+import org.springframework.dao.EmptyResultDataAccessException
+import org.springframework.data.annotation.Id
+import org.springframework.data.mongodb.core.index.Indexed
+import org.springframework.data.mongodb.core.mapping.Document
+import org.springframework.data.mongodb.repository.MongoRepository
+import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
+import org.springframework.http.ResponseEntity
+import org.springframework.stereotype.Service
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.DeleteMapping
-import io.swagger.annotations.ApiModel
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
-import com.fasterxml.jackson.annotation.JsonIgnore
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.dao.EmptyResultDataAccessException
-import org.springframework.http.ResponseEntity
-import org.springframework.data.mongodb.core.mapping.Document
-import org.springframework.stereotype.Service
-import org.springframework.http.MediaType
-import org.slf4j.LoggerFactory
-import org.springframework.data.mongodb.core.index.Indexed
-import org.springframework.data.annotation.Id
-import org.springframework.dao.DuplicateKeyException
+import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.bind.annotation.RestController
 
 @ApiModel
 @Document(collection = "assistant")
 data class Assistant(
   val apiKey: String,
   @Indexed(unique = true) val instance: String,
-  @JsonIgnore @Id val idAssistant: String? = null
-)
+  @JsonIgnore @Id val idAssistant: String? = null)
 
 fun Assistant(key: String = java.util.UUID.randomUUID().toString()): Assistant =
   Assistant(instance = key, apiKey = java.util.Base64.getEncoder()
@@ -58,7 +58,7 @@ open class AssistantService(
 ) {
 
   companion object {
-    val LOGGER = LoggerFactory.getLogger(AssistantService::class.java)
+    val LOGGER = org.slf4j.LoggerFactory.getLogger(AssistantService::class.java)
     val NO_INSTANCE_FOUND_MESSAGE = "No assistant found with given instance identifier: "
   }
 
@@ -87,7 +87,7 @@ open class AssistantService(
 }
 
 @RestController @RequestMapping(
-  path = arrayOf("/api/v1/instance"),
+  path = arrayOf("/instance/api/v1"),
   produces = arrayOf(MediaType.APPLICATION_JSON_VALUE))
 open class InstanceController(
   @Autowired val assistantService: AssistantService
@@ -119,5 +119,7 @@ open class InstanceController(
   @ApiOperation(value = "Delete instance from given key.")
   fun delete(@PathVariable instance: String) =
     this.assistantService.deleteByInstance(instance)
+
+  // MOAR ENDPOINTS
 
 }

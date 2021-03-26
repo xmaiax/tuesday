@@ -2,9 +2,9 @@ package darwin
 
 import opennlp.tools.util.Span
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.stereotype.Component
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.MediaType
+import org.springframework.stereotype.Component
 
 data class Word(val token: String, val tag: Tag,
   val lemma: String?, val chance: Double)
@@ -47,9 +47,6 @@ open class BRLemmatizer(@Value(
     "\${nlp.embedded-dict-resource-path}") val embeddedDictPath: String) :
   opennlp.tools.lemmatizer.DictionaryLemmatizer(
     ResouceReader.getResourceAsStream(embeddedDictPath)) {
-  companion object {
-    val logger: org.slf4j.Logger =
-      org.slf4j.LoggerFactory.getLogger(BRLemmatizer::class.java) }
   override fun lemmatize(tokens: Array<String>, postags: Array<String>) =
     super.lemmatize(tokens, postags).map { lemm ->
       if (lemm == "O") null else lemm
@@ -100,12 +97,12 @@ open class NLPService(
     "\${nlp.embedded-dict-minimal-probability}")
       val embeddedDictMinimalProb: Double) {
   companion object {
-    val logger: org.slf4j.Logger =
+    val LOGGER: org.slf4j.Logger =
       org.slf4j.LoggerFactory.getLogger(NLPService::class.java) }
   fun analyzeText(text: Text): Text {
     val startTime = java.util.Calendar.getInstance().getTimeInMillis()
     val output = this.sentenceDetector.sentDetect(text.input).map { sentence ->
-      logger.debug("Analysing sentence: ${sentence}")
+      LOGGER.debug("Analysing sentence: ${sentence}")
       val tokens = this.tokenizer.tokenize(sentence)
       val tags = this.posTagger.tag(tokens)
       val probs = this.posTagger.probs()
@@ -120,7 +117,7 @@ open class NLPService(
               ).contains(tags[i])
             ) tags[i]
             else {
-              logger.warn("No dictionary tag found (word: '${
+              LOGGER.debug("No dictionary tag found (word: '${
                 tokens[i]}', tag: '${Tag.fromCode(tags[i])
                   }', chance: ${probs[i]})")
               tags[i]
@@ -129,7 +126,7 @@ open class NLPService(
           Word(tokens[i], Tag.fromCode(tag), lemma, prob)
         }.toTypedArray()
       val output = Sentence(sentence, words.map { it.chance }.average(), words)
-      logger.debug("Complete sentence analysis: ${output}")
+      LOGGER.debug("Complete sentence analysis: ${output}")
       output
     }.toTypedArray()
     return text.copy(output = output, processingTimeInMillis =
@@ -140,7 +137,7 @@ open class NLPService(
 
 @org.springframework.web.bind.annotation.RestController
 @org.springframework.web.bind.annotation.RequestMapping(
-  path = arrayOf("/api/v1/nlp"),
+  path = arrayOf("/nlp/api/v1"),
   produces = arrayOf(MediaType.APPLICATION_JSON_VALUE))
 open class NLPController(@Autowired val nlpService: NLPService) {
   @io.swagger.annotations.ApiOperation(value = "Analyze given sentence(s).")

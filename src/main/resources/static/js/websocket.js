@@ -1,7 +1,12 @@
 
-const WEBSOCKET_ENDPOINT = '/chat'
-const WEBSOCKET_LISTENER = '/secured/conversation/attendance'
-const WEBSOCKET_MESSAGE_BROKER = '/queue/secured/channel'
+const connectionConfig = {
+  endpoint: '/chat',
+  listeners: [
+    '/secured/conversation/attendance',
+    '/conversation/attendance'
+  ],
+  serverMessageChannel: '/queue/secured/channel'
+}
 
 var stompClient = null;
 
@@ -10,20 +15,18 @@ const sendMessage = (message) => {
     let request = JSON.stringify({
       'message': message
     })
-    stompClient.send(WEBSOCKET_MESSAGE_BROKER, {}, request)
+    stompClient.send(connectionConfig.serverMessageChannel, {}, request)
   }
 }
 
-const chatConnect = (receivedMessageHandler) => {
+const chatConnect = (receivedMessageHandler, connectionErrorHandler) => {
   if(!stompClient) {
-    stompClient = Stomp.over(new SockJS(WEBSOCKET_ENDPOINT))
-    stompClient.connect({}, (frame) => {
-      stompClient.subscribe(WEBSOCKET_LISTENER, (serverMessage) => {
-        receivedMessageHandler(JSON.parse(serverMessage.body))
-      }, (errorMessage) => {
-        stompClient = null
-        console.log(errorMessage)
-        alert('Connection error...')
+    stompClient = Stomp.over(new SockJS(connectionConfig.endpoint))
+    stompClient.connect({}, () => {
+      connectionConfig.listeners.forEach((listener) => {
+        stompClient.subscribe(listener, (serverMessage) => {
+          receivedMessageHandler(JSON.parse(serverMessage.body))
+        }, connectionErrorHandler)
       })
     })
   }
@@ -34,3 +37,5 @@ const chatDisconnect = () => {
   stompClient.disconnect(() => console.log('Disconnecting...'))
   stompClient = null
 }
+
+chatConnect((msg) => console.log(msg))
