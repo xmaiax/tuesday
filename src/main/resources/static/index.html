@@ -13,8 +13,8 @@
     </style>
   </head>
 
-  <body class="container">
-    <div ng-app="darwinApp" ng-controller="darwinController" class="application">
+  <body class="container" ng-app="darwinApp">
+    <div ng-controller="darwinController" class="application">
       <h1>{{ xuruvis }}</h1>
     </div>
   </body>
@@ -24,9 +24,10 @@
   <script src="webjars/sockjs-client/sockjs.min.js"></script>
   <script src="webjars/stomp-websocket/stomp.min.js"></script>
   <script src="webjars/angularjs/angular.min.js"></script>
-  <script src="js/websocket.js"></script>
+  <script src="/js/websocket.js"></script>
   <script type="text/javascript">
 
+    // https://docs.angularjs.org/api/ngRoute/service/$route
     angular.module('darwinApp', []).controller('darwinController', ($scope) => {
       $scope.xuruvis = 'XURUUUUUUUUUUVIS'
     })

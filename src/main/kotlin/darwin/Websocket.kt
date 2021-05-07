@@ -74,13 +74,12 @@ open class WebsocketService(@Autowired val simpTemplate: org.springframework.mes
   fun getAllConnectedSessions() = this.connectedSessions.toTypedArray().clone()
 
   fun genericSessionListener(event: AbstractSubProtocolEvent) =
-    StompHeaderAccessor.wrap(event.getMessage())
-      .getSessionId()?.let { session ->
-        val eventType = event.getMessage().getHeaders().get("stompCommand")
-        LOGGER.info("New websocket event '${eventType}' from session '${session}': ${event.getMessage().getHeaders()}")
-        if(StompCommand.CONNECT.equals(eventType)) this.connectedSessions += session
-        if(StompCommand.DISCONNECT.equals(eventType)) this.connectedSessions -= session
-      } ?: run { throw NoWebsocketSessionException("No session found!") }
+    StompHeaderAccessor.wrap(event.getMessage()).getSessionId()?.let { session ->
+      val eventType = event.getMessage().getHeaders().get("stompCommand")
+      LOGGER.info("New websocket event '${eventType}' from session '${session}': ${event.getMessage().getHeaders()}")
+      if(StompCommand.CONNECT.equals(eventType)) this.connectedSessions += session
+      if(StompCommand.DISCONNECT.equals(eventType)) this.connectedSessions -= session
+    } ?: run { throw NoWebsocketSessionException("No session found!") }
 
   fun receiveMessage(session: String, inputMessage: InputMessage) =
     LOGGER.info("Received message from '${session}': ${inputMessage}")
@@ -144,7 +143,7 @@ open class WebsocketController(@Autowired val websocketService: WebsocketService
 
   @ResponseBody
   @ApiOperation(value = "Send message to an active session.")
-  @PostMapping(value = arrayOf("/message-{session}"))
+  @PostMapping(value = arrayOf("/{session}/message"))
   fun sendMessage(@RequestBody payload: Any,
       @PathVariable session: String) =
     try { this.websocketService.sendMessage(OutputMessage(session, payload)) }
