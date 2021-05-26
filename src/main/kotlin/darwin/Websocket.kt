@@ -73,12 +73,41 @@ open class WebsocketService(@Autowired val simpTemplate: org.springframework.mes
   private val connectedSessions = mutableSetOf<String>()
   fun getAllConnectedSessions() = this.connectedSessions.toTypedArray().clone()
 
+  @Suppress("UNCHECKED_CAST")
+  private fun subscribeUnsubscribeEventHandler(event: AbstractSubProtocolEvent, session: String, isSubscribe: Boolean) {
+    val subUnsunDesc = if(isSubscribe) "subscribed" else "unsubscribed"
+    try {
+      val channels = (event.getMessage().getHeaders().get("nativeHeaders"
+        ) as Map<String, Any>).get("destination") as List<String>?
+      LOGGER.info("Client '${session}' ${subUnsunDesc} the following channels: ${channels}")
+    }
+    catch(ex: Exception) {
+      when(ex) {
+        is ClassCastException, is TypeCastException -> {
+          LOGGER.error("Cannot find '${session}' ${subUnsunDesc} channels: ${ex.message}")
+        }
+        else -> throw ex
+      }
+    }
+  }
+
   fun genericSessionListener(event: AbstractSubProtocolEvent) =
     StompHeaderAccessor.wrap(event.getMessage()).getSessionId()?.let { session ->
-      val eventType = event.getMessage().getHeaders().get("stompCommand")
-      LOGGER.info("New websocket event '${eventType}' from session '${session}': ${event.getMessage().getHeaders()}")
-      if(StompCommand.CONNECT.equals(eventType)) this.connectedSessions += session
-      if(StompCommand.DISCONNECT.equals(eventType)) this.connectedSessions -= session
+      val eventType = event.getMessage().getHeaders().get("stompCommand") as StompCommand
+      LOGGER.debug("New websocket event '${eventType}' from session '${session}': ${event.getMessage().getHeaders()}")
+      when(eventType) {
+        StompCommand.CONNECT -> {
+          LOGGER.info("New connected client: ${session}")
+          this.connectedSessions += session
+        }
+        StompCommand.DISCONNECT -> {
+          LOGGER.info("Disconnected client: ${session}")
+          this.connectedSessions -= session
+        }
+        StompCommand.SUBSCRIBE -> subscribeUnsubscribeEventHandler(event, session, true)
+        StompCommand.UNSUBSCRIBE -> subscribeUnsubscribeEventHandler(event, session, false)
+        else -> Unit
+      }
     } ?: run { throw NoWebsocketSessionException("No session found!") }
 
   fun receiveMessage(session: String, inputMessage: InputMessage) =
