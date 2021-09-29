@@ -1,41 +1,37 @@
+const WS_URL_CONN_INFO = '/api/v1/websocket/connection-info'
 
-const connectionConfig = {
-  endpoint: '/chat',
-  listeners: [
-    '/secured/conversation/attendance',
-    '/conversation/attendance'
-  ],
-  serverMessageChannel: '/queue/secured/channel'
-}
+angular.module('darwinApp', []).controller('darwinController', ($scope, $http) => {
 
-var stompClient = null;
+  $scope.xuruvis = 'XURUUUUUUUUUUVIS'
 
-const sendMessage = (message) => {
-  if(!!stompClient) {
-    let request = JSON.stringify({
-      'message': message
-    })
-    stompClient.send(connectionConfig.serverMessageChannel, {}, request)
-  }
-}
+  $scope.receivedMessageHandler = (msg) => console.log(msg)
+  $scope.connectionErrorHandler = (msg) => console.error(msg)
 
-const chatConnect = (receivedMessageHandler, connectionErrorHandler) => {
-  if(!stompClient) {
-    stompClient = Stomp.over(new SockJS(connectionConfig.endpoint))
-    stompClient.connect({}, () => {
-      connectionConfig.listeners.forEach((listener) => {
-        stompClient.subscribe(listener, (serverMessage) => {
-          receivedMessageHandler(JSON.parse(serverMessage.body))
-        }, connectionErrorHandler)
+  $scope.connect = () => $http.get(WS_URL_CONN_INFO).then((response) => {
+    $scope.serverMessageChannel = response.data.serverMessageChannel
+    $scope.stompClient = Stomp.over(new SockJS(response.data.endpoint))
+    $scope.stompClient.connect({}, () => {
+      response.data.listeners.forEach((listener) => {
+        $scope.stompClient.subscribe(listener, (serverMessage) => {
+          $scope.receivedMessageHandler(JSON.parse(serverMessage.body))
+        }, $scope.connectionErrorHandler)
       })
     })
+  }, (error) => {
+    $scope.connectionErrorHandler(`HTTP ${error.status}`)
+  })
+  $scope.connect()
+
+  $scope.disconnect = () => {
+    $scope.stompClient.disconnect(() => $scope.connectionErrorHandler('Disconnecting...'))
+    $scope.stompClient = null
   }
-  else alert('Already connected!')
-}
 
-const chatDisconnect = () => {
-  stompClient.disconnect(() => console.log('Disconnecting...'))
-  stompClient = null
-}
+  $scope.sendMessage = (msg) => {
+    if(!!$scope.stompClient && !!$scope.serverMessageChannel) {
+      $scope.stompClient.send($scope.serverMessageChannel, {},
+        JSON.stringify({ 'message': msg }))
+    }
+  }
 
-chatConnect((msg) => console.log(msg))
+})
