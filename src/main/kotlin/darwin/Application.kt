@@ -9,27 +9,22 @@ open class Application : org.springframework.web.servlet.config.annotation.WebMv
       registry: org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry) {
     registry.addResourceHandler("/**").addResourceLocations("classpath:/static/")
     registry.addResourceHandler("swagger-ui.html")
-      .addResourceLocations("classpath:/META-INF/resources/")
-  }
+      .addResourceLocations("classpath:/META-INF/resources/") }
   companion object { @JvmStatic fun main(args: Array<String>) {
     org.springframework.boot.SpringApplication.run(Application::class.java, *args) }
-    val LOGGER: org.slf4j.Logger = org.slf4j.LoggerFactory.getLogger(Application::class.java)
-  }
+    val LOGGER: org.slf4j.Logger = org.slf4j.LoggerFactory.getLogger(Application::class.java) }
   @Value("\${spring.application.name}") var appName: String? = null
   @Value("\${server.port}") var serverPort: String? = null
   @Value("\${server.servlet.context-path}") var webContextPath: String? = null
   @javax.annotation.PostConstruct
-  fun startingMessage() {
-    LOGGER.info("Starting '${this.appName}' on port ${this.serverPort
-      } (Web Context: ${this.webContextPath}), please wait...")
-  }
+  fun startingMessage() = LOGGER.info("Starting '${this.appName}' on port ${
+    this.serverPort} (Web Context: ${this.webContextPath}), please wait...")
 }
 class ResouceReader {
   companion object {
     fun getResourceAsStream(resource: String) =
       Thread.currentThread().getContextClassLoader()
-        .getResourceAsStream(resource)
-  }
+        .getResourceAsStream(resource) }
 }
 
 @org.springframework.stereotype.Component

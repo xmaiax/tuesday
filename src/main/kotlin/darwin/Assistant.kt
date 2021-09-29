@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 @RestController @RequestMapping(
-  path = arrayOf("/assistant/api/v1"),
+  path = arrayOf("/api/v1/assistant"),
   produces = arrayOf(MediaType.APPLICATION_JSON_VALUE),
   consumes = arrayOf(MediaType.APPLICATION_JSON_VALUE))
 open class AssistantController() {

@@ -74,7 +74,8 @@ open class WebsocketService(@Autowired val simpTemplate: org.springframework.mes
   fun getAllConnectedSessions() = this.connectedSessions.toTypedArray().clone()
 
   @Suppress("UNCHECKED_CAST")
-  private fun subscribeUnsubscribeEventHandler(event: AbstractSubProtocolEvent, session: String, isSubscribe: Boolean) {
+  private fun subscribeUnsubscribeEventHandler(event: AbstractSubProtocolEvent,
+      session: String, isSubscribe: Boolean) {
     val subUnsunDesc = if(isSubscribe) "subscribed" else "unsubscribed"
     try {
       val channels = (event.getMessage().getHeaders().get("nativeHeaders"
@@ -85,8 +86,7 @@ open class WebsocketService(@Autowired val simpTemplate: org.springframework.mes
       when(ex) {
         is ClassCastException, is TypeCastException -> {
           LOGGER.error("Cannot find '${session}' ${subUnsunDesc} channels: ${ex.message}")
-        }
-        else -> throw ex
+        } else -> throw ex
       }
     }
   }
@@ -156,7 +156,7 @@ open class WebsocketBroker(@Autowired val websocketService: WebsocketService) {
 }
 
 @RestController @CrossOrigin @Api(value = "Websocket API")
-@RequestMapping(value = arrayOf("/websocket/api/v1"),
+@RequestMapping(value = arrayOf("/api/v1/websocket"),
   produces = arrayOf(org.springframework.http.MediaType.APPLICATION_JSON_VALUE))
 open class WebsocketController(@Autowired val websocketService: WebsocketService) {
 

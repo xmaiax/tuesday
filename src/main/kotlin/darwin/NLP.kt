@@ -137,7 +137,7 @@ open class NLPService(
 
 @org.springframework.web.bind.annotation.RestController
 @org.springframework.web.bind.annotation.RequestMapping(
-  path = arrayOf("/nlp/api/v1"),
+  path = arrayOf("/api/v1/nlp"),
   produces = arrayOf(MediaType.APPLICATION_JSON_VALUE))
 open class NLPController(@Autowired val nlpService: NLPService) {
   @io.swagger.annotations.ApiOperation(value = "Analyze given sentence(s).")
