@@ -3,7 +3,7 @@ const MSG_ALREADY_CONNECTED = 'J\u00e1 est\u00e1 conectado no websocket!'
 const MSG_PREFIX_ERROR_LOADING_CONN_INFO = 'Erro ao buscar informa\u00e7\u00f5es de conex\u00e3o'
 const MSG_DISCONNECTING = 'Desconectando...'
 
-angular.module('darwinApp', []).controller('darwinController', ($scope, $http) => {
+angular.module('tuesdayApp', []).controller('tuesdayController', ($scope, $http) => {
 
   $scope.sendMessage = (msg) => {
     if(!!$scope.stompClient && !!$scope.serverMessageChannel) {
