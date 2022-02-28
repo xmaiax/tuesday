@@ -1,7 +1,11 @@
 package tuesday.configuration;
 
+import java.math.BigInteger;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
+import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
+import org.springframework.data.redis.connection.jedis.JedisClientConfiguration;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 
 import redis.embedded.RedisServer;
@@ -18,7 +22,7 @@ public class RedisConfiguration {
 
   private RedisServer redisServer;
 
-  @Bean
+  @Bean @org.springframework.context.annotation.Profile({ "local", })
   public RedisServer redisServer() {
     this.redisServer = RedisServer.builder().port(this.port).build();
     boolean noException = Boolean.TRUE;
@@ -47,8 +51,32 @@ public class RedisConfiguration {
 
   @Bean
   public JedisConnectionFactory jedisConnectionFactory() {
-    return new JedisConnectionFactory(new org.springframework.data.redis.connection
-      .RedisStandaloneConfiguration(this.host, this.port));
+    final String redisUrl = System.getenv("REDIS_URL");
+    if(redisUrl != null) {
+      try {
+        final javax.net.ssl.SSLContext sslContext = javax.net.ssl.SSLContext.getInstance("SSL");
+        sslContext.init(null, new javax.net.ssl.TrustManager[] { new javax.net.ssl.X509TrustManager() {
+          @Override public void checkClientTrusted(java.security.cert.X509Certificate[] certs,
+            String authType) throws java.security.cert.CertificateException { }
+          @Override public void checkServerTrusted(java.security.cert.X509Certificate[] certs,
+            String authType) throws java.security.cert.CertificateException { }
+          @Override public java.security.cert.X509Certificate[] getAcceptedIssuers() { return null; }
+        }}, new java.security.SecureRandom());
+        final RedisStandaloneConfiguration rsc = new RedisStandaloneConfiguration(
+          redisUrl.split("@")[BigInteger.ONE.intValue()].split(":")[BigInteger.ZERO.intValue()],
+          Integer.parseInt(redisUrl.split("@")[BigInteger.ONE.intValue()].split(":")[BigInteger.ONE.intValue()]));
+        rsc.setPassword(redisUrl.split("@")[BigInteger.ZERO.intValue()].split("//")[
+          BigInteger.ONE.intValue()].substring(BigInteger.ONE.intValue()));
+        return new JedisConnectionFactory(rsc, JedisClientConfiguration.builder().useSsl()
+          .hostnameVerifier((hostname, session) -> true)
+          .sslSocketFactory(sslContext.getSocketFactory())
+          .sslParameters(sslContext.getDefaultSSLParameters()).build());
+      }
+      catch (java.security.NoSuchAlgorithmException | java.security.KeyManagementException ex) {
+        log.error("Unable to start Redis connection with given URL: {}", redisUrl, ex);
+      }
+    }
+    return new JedisConnectionFactory(new RedisStandaloneConfiguration(this.host, this.port));
   }
 
   @Bean
