@@ -23,7 +23,7 @@ public class RedisConfiguration {
 
   private RedisServer redisServer;
 
-  @Bean @org.springframework.context.annotation.Profile({ "local", })
+  @Bean @org.springframework.context.annotation.Profile({ "local", "heroku", })
   public RedisServer redisServer() {
     final String redisUrl = System.getenv(ENV_VAR_REDIS_URL);
     if(redisUrl != null && !redisUrl.isBlank()) return null;
