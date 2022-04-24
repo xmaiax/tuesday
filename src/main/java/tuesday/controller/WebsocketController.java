@@ -24,8 +24,7 @@ public class WebsocketController {
 
   @lombok.Getter public static class ConnectionInfo {
     private String endpoint = WS_ENDPOINT;
-    private String[] listeners = { CLIENT_SECURED_PREFIX + BROKER +
-      CLIENT_LISTENER, BROKER + CLIENT_LISTENER };
+    private String[] listeners = { CLIENT_SECURED_PREFIX + BROKER + CLIENT_LISTENER, };
     private String serverMessageChannel = APP_DEST_PREFIX +
       CLIENT_SECURED_PREFIX + SERVER_CHANNEL_SUFFIX;
     public static final ConnectionInfo DEFAULT = new ConnectionInfo();
@@ -66,14 +65,6 @@ public class WebsocketController {
       .setPayload(payload).setSession(session));
     return ResponseEntity.status(message.getSession() != null && !message.getSession().isEmpty() ?
       HttpStatus.OK : HttpStatus.INTERNAL_SERVER_ERROR).body(message);
-  }
-
-  @PostMapping(value = { "/broadcast", })
-  @ApiOperation(value = "Send message to all active sessions.")
-  public ResponseEntity<Object> broadcast(@RequestBody Object payload) {
-    final Boolean success = this.service.broadcast(payload);
-    return ResponseEntity.status(success ? HttpStatus.OK :
-      HttpStatus.INTERNAL_SERVER_ERROR).body(payload);
   }
 
 }

@@ -93,15 +93,4 @@ public class WebsocketServiceImpl implements tuesday.service.WebsocketService {
       String.format("Session '%s' not found.", message.getSession()))).setSession(null);
   }
 
-  @Override
-  public Boolean broadcast(Object message) {
-    log.info("Broadcasting message: {}", message);
-    try { this.simpTemplate.convertAndSend(BROKER + CLIENT_LISTENER, message); }
-    catch(org.springframework.messaging.MessagingException mex) {
-      log.error("Unable to broadcast message '{}': {}", message, mex.getMessage());
-      return Boolean.FALSE;
-    }
-    return Boolean.TRUE;
-  }
-
 }
