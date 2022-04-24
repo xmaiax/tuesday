@@ -14,6 +14,7 @@ import redis.embedded.RedisServer;
 @org.springframework.context.annotation.Configuration
 public class RedisConfiguration {
 
+  public static final String ENV_VAR_REDIS_URL = "REDIS_URL";
   public static final String REGEX_BINDED_REDIS_PORT = "(# Creating Server TCP listening socket )(\\w.)*(: bind:)";
 
   @Value("${redis.host}") private String host;
@@ -24,7 +25,9 @@ public class RedisConfiguration {
 
   @Bean @org.springframework.context.annotation.Profile({ "local", })
   public RedisServer redisServer() {
-    this.redisServer = RedisServer.builder().port(this.port).build();
+    final String redisUrl = System.getenv(ENV_VAR_REDIS_URL);
+    if(redisUrl != null && !redisUrl.isBlank()) return null;
+    else this.redisServer = RedisServer.builder().port(this.port).build();
     boolean noException = Boolean.TRUE;
     try { this.redisServer.start(); }
     catch(RuntimeException rex) {
@@ -51,8 +54,8 @@ public class RedisConfiguration {
 
   @Bean
   public JedisConnectionFactory jedisConnectionFactory() {
-    final String redisUrl = System.getenv("REDIS_URL");
-    if(redisUrl != null) {
+    final String redisUrl = System.getenv(ENV_VAR_REDIS_URL);
+    if(redisUrl != null && !redisUrl.isBlank()) {
       try {
         final javax.net.ssl.SSLContext sslContext = javax.net.ssl.SSLContext.getInstance("SSL");
         sslContext.init(null, new javax.net.ssl.TrustManager[] { new javax.net.ssl.X509TrustManager() {
