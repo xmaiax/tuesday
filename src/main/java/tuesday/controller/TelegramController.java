@@ -28,6 +28,7 @@ import tuesday.service.WebsocketService;
   public ResponseEntity<Void> webhook(
       @RequestHeader(required = false) Map<String, String> headers,
       @RequestBody(required = false) Map<String, Object> body) {
+    System.err.println("Mensagem recebida!");
     this.websocketService.allConnectedSessions().forEach((session) -> {
       this.websocketService.send(new OutputMessage().setSession(session)
         .setPayload(Map.of("headers", headers, "body", body)));
